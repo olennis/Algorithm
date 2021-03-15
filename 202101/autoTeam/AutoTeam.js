@@ -1,16 +1,3 @@
-function myFunction() {
-var sheetName = '24기 First Team' //${oo}기 ${First || Final} Team //이 이름으로 시트가 생성됩니다.
-var sheet = SpreadsheetApp.getActive();
- var obj = {}
- var sheet = SpreadsheetApp.getActiveSheet();
- var students = sheet.getRange("C200:C263").getValues()//숫자만 바꾸면 됩니다
- var favorite = sheet.getRange("I200:K263").getValues() //숫자만 바꾸면 됩니다
- var difficult = sheet.getRange("L200:N263").getValues() //숫자만 바꾸면 됩니다
-for(let i = 0; i < students.length; i += 1){
-  obj[students[i][0]] = {"Favorite":favorite[i],"Difficult":difficult[i]}
-} //수강생들의 선호도 조사 결과 객체 생성 
-
-
 const autoTeam = (data) => {
   const sortArr = []; //수강생들을 포인트 순으로 정렬한 배열
   const team = {}; //
@@ -67,6 +54,15 @@ const autoTeam = (data) => {
     }
     return check;
   }; //arr팀에서 비선호 하는 사람이 있는지
+  const isFitTeam = (name) => {
+    const [fav1,fav2,fav3] = data[name].Favorite
+    if(isCross(name,fav1) && isCross(name,fav2) && isCross(name,fav3) && isCross(fav1,fav2) && isCross(fav2,fav3) && isCross(fav2,fav3)){
+      return true
+    }
+    else{
+      return false
+    }
+  } //네명이 서로 말을 맞췄는지
   const makePoint = (name) => {
     let point = 0;
     for (let key in data) {
@@ -83,6 +79,7 @@ const autoTeam = (data) => {
   };// 수강생을 정렬시키기 위한 포인트 생성 함수. name을 선호하는 사람이 있으면 ++ name을 비선호한다면 --
   const makeSortArr = () => {
     for(let i = 0; i < remainArr.length; i += 1){
+      
       makePoint(remainArr[i])
     }
     sortArr.sort((a,b) => b[1]-a[1])
@@ -96,7 +93,10 @@ const autoTeam = (data) => {
       }
     }
     for(let key in data){
-      if(isCross(key,data[key].Favorite[0]) && isCross(key,data[key].Favorite[1]) && isCross(data[key].Favorite[1],data[key].Favorite[0])){
+      if(isFitTeam(key)){
+        madeTeam.push([key, data[key].Favorite[0],data[key].Favorite[1],data[key].Favorite[2]].sort())
+      }
+      else if(isCross(key,data[key].Favorite[0]) && isCross(key,data[key].Favorite[1]) && isCross(data[key].Favorite[1],data[key].Favorite[0])){
         madeTeam.push([key,data[key].Favorite[0],data[key].Favorite[1]].sort())
       }
       else if(isCross(key,data[key].Favorite[0]) && isCross(key,data[key].Favorite[2]) && isCross(data[key].Favorite[2],data[key].Favorite[0])){
@@ -107,7 +107,6 @@ const autoTeam = (data) => {
       }
       
     } //세명이 서로 짝대기가 맞을 경우를 체크하는 반복문
-    
     for(let i = 0; i < madeTeam.length; i += 1){
       if(!tempObj[madeTeam[i]]){
         tempObj[madeTeam[i]] = 1
@@ -121,6 +120,7 @@ const autoTeam = (data) => {
         delete tempObj[key]
       }
     } // 쓸모없는 데이터 삭제
+    
     for(let i = 0; i < Object.keys(tempObj).length; i += 1){
       team[i+1] = Object.keys(tempObj)[i].split(',')
     } //짝대기가 맞는 세명을 우선적으로 팀 배치
@@ -143,18 +143,21 @@ const autoTeam = (data) => {
         }
       }
     } //변절자 없는 네명 팀 만들기
+  
     
   
     
     
   } //짝대기 맞는 팀을 먼저 배정하는 함수
+  
   const makeTeam = () => {
     // 1. 팀이 선호하는 사람
     // 2. 본인이 선호하는 사람
     // 3. 그냥 꽂기
     makeFitTeam()
     makeSortArr()
-    
+    console.log(sortArr,'배치되지 않은 사람들입니다. 선호도 점수 순으로 들어가요')
+    console.log(team,'사전에 말을 맞춘 사람들입니다. 선호도 점수에 영향을 받지 않습니다.')
     const peopleNum = Object.keys(data).length //총 인원 수
     if(peopleNum % 4 === 0){
       console.log(`총 인원 : ${peopleNum}, 4명 팀 : ${parseInt(peopleNum / 4)}, 3명 팀 : 0`)
@@ -453,16 +456,3 @@ const autoTeam = (data) => {
  return team
   
 };
-// 스프레드 시트에 뿌리기 위한 코드
-var team = autoTeam(obj)
-SpreadsheetApp.getActiveSpreadsheet().insertSheet(sheetName);
-var resultSheet = SpreadsheetApp.getActive().getSheetByName(sheetName)
-var range;
-var count = 1
-for(let key in team){
-  team[key].unshift(count)
-  range = resultSheet.getRange(count,1,1,team[key].length)
-  range.setValues([team[key]])
-  count ++
-}
-}
