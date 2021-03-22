@@ -1,0 +1,96 @@
+## isPalindrome
+
+Given an integer `x`, return `true` if `x` is palindrome integer.
+
+An integer is a **palindrome** when it reads the same backward as forward. For example, `121` is palindrome while `123` is not.
+
+**Example 1:**
+
+```
+Input: x = 121
+Output: true
+
+```
+
+**Example 2:**
+
+```
+Input: x = -121
+Output: false
+Explanation: From left to right, it reads -121. From right to left, it becomes 121-. Therefore it is not a palindrome.
+
+```
+
+**Example 3:**
+
+```
+Input: x = 10
+Output: false
+Explanation: Reads 01 from right to left. Therefore it is not a palindrome.
+
+```
+
+**Example 4:**
+
+```
+Input: x = -101
+Output: false
+
+```
+
+**Constraints:**
+
+- `231 <= x <= 231 - 1`
+
+**Follow up:**
+
+Could you solve it without converting the integer to a string?
+
+**Code:**
+
+```jsx
+var isPalindrome = function(x) {
+  let answer = true
+  let isNeg = false
+    
+    if(x < 0) isNeg = true
+    let string = Math.abs(x).toString().split('')
+    if(string.length % 2 ===0 ){
+      let mid = string.length/2
+      let forward = string.slice(0,mid)
+      let back = string.slice(mid,string.length).reverse()
+      for(let i = 0; i<string.length; i += 1){
+        if(forward[i] !== back[i]){
+          answer = false
+        }
+      }
+      if(answer && !isNeg){
+        return true
+      }
+     return false
+    }
+    else{
+      let mid = parseInt(string.length/2)
+      let forward = string.slice(0,mid)
+      let back = string.slice(mid+1).reverse()
+      console.log(forward,back)
+      for(let i = 0; i < forward.length; i += 1){
+        if(forward[i] !== back[i]){
+          answer = false
+        }
+        
+      }
+      if(answer && !isNeg){
+        return true
+      }
+      return false
+    }
+  
+  
+};
+```
+
+1. x가 음수인지 판단하는 변수 선언
+2. x의 절대값을 split 해서 쪼갠 후
+3. 2번의 배열을 반으로 나눠서 mid값 설정
+4. 앞의 배열과 뒤의 배열.reverse가 같고, isNeg가 false(음수)일 때 return true
